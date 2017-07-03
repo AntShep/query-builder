@@ -1,16 +1,16 @@
 {
-    "name": "anton/query-builder",
-    "description": "Simple SQL QueryBuilder",
-    "type": "library",
-    "require": {
-        "doctrine/orm": "^2.5",
-        "phpunit/phpunit": "^6.2"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "AntShep",
-            "email": "shepotko.anton@gmail.com"
-        }
-    ]
+  "name": "anton/query-builder",
+  "description": "Simple SQL QueryBuilder",
+  "type": "library",
+  "require": {
+    "php": ">=7.0",
+    "phpunit/phpunit": "^6.2"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "AntShep",
+      "email": "shepotko.anton@gmail.com"
+    }
+  ]
 }
