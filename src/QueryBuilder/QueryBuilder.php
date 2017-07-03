@@ -3,6 +3,7 @@
 namespace QueryBuilder;
 
 use QueryBuilder\Part\Limit;
+use QueryBuilder\Part\Order;
 use QueryBuilder\Part\PartInterface;
 use QueryBuilder\Part\Select;
 use QueryBuilder\Part\Table;
@@ -18,14 +19,7 @@ class QueryBuilder
     /**
      * @var PartInterface[]
      */
-    private $parts = [
-        //        'select'  => [],
-        //        'table'   => null,
-        //        'where'   => [],
-        //        'orderBy' => [],
-        //        'offset'  => null,
-        //        'limit'   => null,
-    ];
+    private $parts = [];
 
     /**
      * @param PartInterface $part
@@ -96,6 +90,36 @@ class QueryBuilder
     }
 
     /**
+     * @param string $sort
+     * @param string $order
+     *
+     * @return self
+     */
+    public function orderBy(string $sort, string $order = null): self
+    {
+        $this->checkPart(Order::TYPE);
+
+        $part = $this->parts[Order::TYPE];
+        $part->add([$sort, $order], false);
+        return $this;
+    }
+
+    /**
+     * @param string $sort
+     * @param string $order
+     *
+     * @return self
+     */
+    public function addOrderBy(string $sort, string $order = null): self
+    {
+        $this->checkPart(Order::TYPE);
+
+        $part = $this->parts[Order::TYPE];
+        $part->add([$sort, $order], true);
+        return $this;
+    }
+
+    /**
      * @param int      $limit
      * @param int|null $offset
      *
@@ -118,9 +142,10 @@ class QueryBuilder
         $this->checkPart(Table::TYPE);
 
         $query = $this->parts[Select::TYPE]->toString() . ' ' . $this->parts[Table::TYPE]->toString()
+            . (isset($this->parts[Order::TYPE]) ? ' ' . $this->parts[Order::TYPE]->toString() : '')
             . (isset($this->parts[Limit::TYPE]) ? ' ' . $this->parts[Limit::TYPE]->toString() : '');
 
-        return $query;
+        return trim($query);
     }
 
     /**
