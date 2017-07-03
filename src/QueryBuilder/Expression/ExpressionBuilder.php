@@ -2,6 +2,8 @@
 
 namespace QueryBuilder\Expression;
 
+use QueryBuilder\Helper\QueryBuilderHelper;
+
 /**
  * Class ExpressionBuilder
  *
@@ -39,15 +41,20 @@ class ExpressionBuilder
     /**
      * Creates a comparison expression.
      *
-     * @param mixed  $x
-     * @param string $operator
-     * @param mixed  $y
+     * @param mixed $x
+     * @param mixed $operator
+     * @param mixed $y
+     * @param bool  $forceEscape
      *
      * @return string
      */
-    public function comparison($x, string $operator, $y): string
+    public static function comparison($x, $operator, $y, bool $forceEscape = true): string
     {
-        return $x . ' ' . $operator . ' ' . $y;
+        if ($forceEscape) {
+            $y = QueryBuilderHelper::escape($y);
+        }
+
+        return trim($x . ' ' . $operator . ' ' . $y);
     }
 
     /**
@@ -144,7 +151,7 @@ class ExpressionBuilder
      */
     public function in($x, $y): string
     {
-        return $this->comparison($x, 'IN', sprintf('(%s)', implode(', ', (array)$y)));
+        return $this->comparison($x, 'IN', sprintf('(%s)', QueryBuilderHelper::escape($y)), false);
 
     }
 
@@ -156,7 +163,7 @@ class ExpressionBuilder
      */
     public function notIn($x, $y): string
     {
-        return $this->comparison($x, 'NOT IN', sprintf('(%s)', implode(', ', (array)$y)));
+        return $this->comparison($x, 'NOT IN', sprintf('(%s)', QueryBuilderHelper::escape($y)), false);
     }
 
     /**
@@ -168,7 +175,12 @@ class ExpressionBuilder
      */
     public function between($x, $min, $max): string
     {
-        return $this->comparison($x, 'BETWEEN', sprintf('%s AND %s', $min, $max));
+        return $this->comparison(
+            $x,
+            'BETWEEN',
+            sprintf('%s AND %s', QueryBuilderHelper::escape($min), QueryBuilderHelper::escape($max)),
+            false
+        );
     }
 
     /**
@@ -180,6 +192,11 @@ class ExpressionBuilder
      */
     public function notBetween($x, $min, $max): string
     {
-        return $this->comparison($x, 'NOT BETWEEN', sprintf('%s AND %s', $min, $max));
+        return $this->comparison(
+            $x,
+            'NOT BETWEEN',
+            sprintf('%s AND %s', QueryBuilderHelper::escape($min), QueryBuilderHelper::escape($max)),
+            false
+        );
     }
 }

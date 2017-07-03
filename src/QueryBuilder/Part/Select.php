@@ -47,7 +47,7 @@ class Select implements PartInterface
      */
     public function toString(): string
     {
-        $template = 'SELECT %s FROM';
+        $template = 'SELECT %s';
 
         $selects = !empty($this->selects) ? implode(', ', $this->selects) : '*';
         return sprintf($template, $selects);

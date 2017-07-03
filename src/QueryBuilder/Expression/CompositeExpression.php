@@ -38,7 +38,7 @@ class CompositeExpression implements \Countable
             $this->type = $type;
         }
 
-        $this->addMultiple($parts);
+        $this->addParts($parts);
     }
 
     /**
@@ -46,7 +46,7 @@ class CompositeExpression implements \Countable
      *
      * @return self
      */
-    public function addMultiple(array $parts): self
+    public function addParts(array $parts): self
     {
         foreach ($parts as $part) {
             $this->add($part);
@@ -82,7 +82,7 @@ class CompositeExpression implements \Countable
      */
     public function __toString(): string
     {
-        if (count($this->parts) === 1) {
+        if ($this->count() === 1) {
             return (string)$this->parts[0];
         }
 

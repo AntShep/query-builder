@@ -6,6 +6,7 @@ use QueryBuilder\Part\Limit;
 use QueryBuilder\Part\Order;
 use QueryBuilder\Part\Select;
 use QueryBuilder\Part\Table;
+use QueryBuilder\Part\Where;
 
 /**
  * Class QueryBuilderFactory
@@ -24,6 +25,7 @@ class QueryBuilderFactory
         $parts = [
             Select::class,
             Table::class,
+            Where::class,
             Limit::class,
             Order::class,
         ];

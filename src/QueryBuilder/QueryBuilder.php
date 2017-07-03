@@ -2,11 +2,14 @@
 
 namespace QueryBuilder;
 
+use QueryBuilder\Expression\CompositeExpression;
+use QueryBuilder\Expression\ExpressionBuilder;
 use QueryBuilder\Part\Limit;
 use QueryBuilder\Part\Order;
 use QueryBuilder\Part\PartInterface;
 use QueryBuilder\Part\Select;
 use QueryBuilder\Part\Table;
+use QueryBuilder\Part\Where;
 use Throwable;
 
 /**
@@ -19,7 +22,12 @@ class QueryBuilder
     /**
      * @var PartInterface[]
      */
-    private $parts = [];
+    protected $parts = [];
+
+    /**
+     * @var ExpressionBuilder
+     */
+    protected $expBuilder;
 
     /**
      * @param PartInterface $part
@@ -33,15 +41,24 @@ class QueryBuilder
     }
 
     /**
+     * @return ExpressionBuilder
+     */
+    public function exp(): ExpressionBuilder
+    {
+        if (!isset($this->expBuilder)) {
+            $this->expBuilder = new ExpressionBuilder();
+        }
+        return $this->expBuilder;
+    }
+
+    /**
      * @param string $tableName
      *
      * @return self
      */
     public function table(string $tableName): self
     {
-        if (!isset($this->parts[Table::TYPE])) {
-            $this->parts[Table::TYPE] = new Table();
-        }
+        $this->checkPart(Table::TYPE);
 
         $part = $this->parts[Table::TYPE];
         $part->add($tableName);
@@ -86,6 +103,54 @@ class QueryBuilder
         $selects = is_array($select) ? $select : func_get_args();
 
         $part->add($selects, true);
+        return $this;
+    }
+
+    /**
+     * @param mixed  $x
+     * @param string $operator
+     * @param mixed  $y
+     *
+     * @return self
+     */
+    public function where($x, string $operator = null, $y = null): self
+    {
+        $this->checkPart(Where::TYPE);
+
+        $part = $this->parts[Where::TYPE];
+        $part->add([$x, $operator, $y]);
+        return $this;
+    }
+
+    /**
+     * @param mixed  $x
+     * @param string $operator
+     * @param mixed  $y
+     *
+     * @return self
+     */
+    public function andWhere($x, string $operator = null, $y = null): self
+    {
+        $this->checkPart(Where::TYPE);
+
+        $part = $this->parts[Where::TYPE];
+        $part->add([$x, $operator, $y, CompositeExpression::TYPE_AND], true);
+        return $this;
+    }
+
+    /**
+     * @param mixed  $x
+     * @param string $operator
+     * @param mixed  $y
+     *
+     * @return self
+     */
+    public function orWhere($x, string $operator = null, $y = null): self
+    {
+        $this->checkPart(Where::TYPE);
+
+        $part = $this->parts[Where::TYPE];
+        $part->add([$x, $operator, $y, CompositeExpression::TYPE_OR], true);
         return $this;
     }
 
@@ -141,7 +206,8 @@ class QueryBuilder
         $this->checkPart(Select::TYPE);
         $this->checkPart(Table::TYPE);
 
-        $query = $this->parts[Select::TYPE]->toString() . ' ' . $this->parts[Table::TYPE]->toString()
+        $query = $this->parts[Select::TYPE]->toString() . ' FROM ' . $this->parts[Table::TYPE]->toString()
+            . (isset($this->parts[Where::TYPE]) ? ' ' . $this->parts[Where::TYPE]->toString() : '')
             . (isset($this->parts[Order::TYPE]) ? ' ' . $this->parts[Order::TYPE]->toString() : '')
             . (isset($this->parts[Limit::TYPE]) ? ' ' . $this->parts[Limit::TYPE]->toString() : '');
 
